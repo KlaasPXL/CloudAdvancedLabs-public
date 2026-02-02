@@ -1,0 +1,120 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    line-height: 1.6;
+}
+
+.resume {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 20px;
+}
+
+.photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-right: 30px;
+    border: 4px solid #4a90e2;
+    object-fit: cover;
+}
+
+.header-info h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #2c3e50;
+}
+
+.header-info h2 {
+    margin: 5px 0;
+    font-size: 18px;
+    color: #4a90e2;
+}
+
+.contact p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.contact i {
+    margin-right: 8px;
+    color: #4a90e2;
+}
+
+section {
+    margin-bottom: 30px;
+}
+
+h3 {
+    color: #4a90e2;
+    font-size: 20px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #4a90e2;
+    padding-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+h3 i {
+    margin-right: 10px;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.skill {
+    background-color: #e9f7fe;
+    color: #4a90e2;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    border-left: 4px solid #4a90e2;
+}
+
+.job {
+    margin-bottom: 25px;
+}
+
+.job h4 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.job span {
+    display: block;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.job p {
+    margin: 5px 0;
+    color: #555;
+}
+
+ul {
+    padding-left: 20px;
+}
+
+ul li {
+    margin-bottom: 8px;
+}
+
