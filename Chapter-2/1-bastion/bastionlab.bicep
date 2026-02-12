@@ -5,40 +5,28 @@ param adminPassword string
 param adminUsername string = 'azureuser'
 
 // Kali VM
-param kaliVmName string = 'kali-vm'
+param kaliVmName string = 'kali'
 param kaliVmSize string = 'Standard_B2ts_v2'
-param kaliVnetName string = 'kali-network'
 param kaliVnetPrefix string = '192.168.0.0/16'
-param kaliSubnetName string = 'kali-subnet'
 param kaliSubnetPrefix string = '192.168.10.0/24'
-param kaliNSGName string = 'nsg-kali'
-param kaliPubIPName string = 'kali-pubip'
 
 // WebSSH VM
-param websshVmName string = 'webssh-vm'
+param websshVmName string = 'webssh'
 param websshVmSize string = 'Standard_B2ts_v2'
-param websshVnetName string = 'webssh-network'
 param websshVnetPrefix string = '10.2.0.0/16'
-param websshSubnetName string = 'webssh-subnet'
 param websshSubnetPrefix string = '10.2.1.0/24'
-param websshNSGName string = 'nsg-webssh'
-param websshPubIPName string = 'webssh-pubip'
 
 // WebBastion VM
-param webbastionVmName string = 'webbastion-vm'
+param webbastionVmName string = 'webbast'
 param webbastionVmSize string = 'Standard_B2ts_v2'
-param webbastionVnetName string = 'webbastion-network'
 param webbastionVnetPrefix string = '10.3.0.0/16'
-param webbastionSubnetName string = 'webbastion-subnet'
 param webbastionSubnetPrefix string = '10.3.1.0/24'
-param webbastionNSGName string = 'nsg-webbastion'
-param webbastionPubIPName string = 'webbastion-pubip'
 
 // ----------------------
 // Kali VM Resources
 // ----------------------
 resource nsgKali 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
-  name: kaliNSGName
+  name: 'nsg-${kaliVmName}'
   location: location
   properties: {
     securityRules: [
@@ -60,7 +48,7 @@ resource nsgKali 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
 }
 
 resource kaliVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
-  name: kaliVnetName
+  name: 'vnet-${kaliVmName}'
   location: location
   properties: {
     addressSpace: {
@@ -68,7 +56,7 @@ resource kaliVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
     }
     subnets: [
       {
-        name: kaliSubnetName
+        name: 'nsg-${kaliVmName}'
         properties: {
           addressPrefix: kaliSubnetPrefix
           networkSecurityGroup: {
@@ -81,7 +69,7 @@ resource kaliVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
 }
 
 resource kaliPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
-  name: kaliPubIPName
+  name: 'pubip-${kaliVmName}'
   location: location
   sku: {
     name: 'Standard'
@@ -92,7 +80,7 @@ resource kaliPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
 }
 
 resource kaliNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
-  name: '${kaliVmName}-nic'
+  name: 'nic-${kaliVmName}'
   location: location
   properties: {
     ipConfigurations: [
@@ -113,7 +101,7 @@ resource kaliNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
 }
 
 resource kaliVm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
-  name: kaliVmName
+  name: 'vm-${kaliVmName}'
   location: location
 
   plan: {
@@ -163,7 +151,7 @@ packages:
 // WebSSH VM Resources
 // ----------------------
 resource nsgWebssh 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
-  name: websshNSGName
+  name: 'nsg-${websshVmName}'
   location: location
   properties: {
     securityRules: [
@@ -198,7 +186,7 @@ resource nsgWebssh 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
 }
 
 resource websshVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
-  name: websshVnetName
+  name: 'vnet-${websshVmName}'
   location: location
   properties: {
     addressSpace: {
@@ -206,7 +194,7 @@ resource websshVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
     }
     subnets: [
       {
-        name: websshSubnetName
+        name: 'subnet-${websshVmName}'
         properties: {
           addressPrefix: websshSubnetPrefix
           networkSecurityGroup: {
@@ -219,7 +207,7 @@ resource websshVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
 }
 
 resource websshPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
-  name: websshPubIPName
+  name: 'pubip-${websshVmName}'
   location: location
   sku: {
     name: 'Standard'
@@ -230,7 +218,7 @@ resource websshPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
 }
 
 resource websshNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
-  name: '${websshVmName}-nic'
+  name: 'nic-${websshVmName}'
   location: location
   properties: {
     ipConfigurations: [
@@ -251,7 +239,7 @@ resource websshNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
 }
 
 resource websshVm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
-  name: websshVmName
+  name: 'vm-${websshVmName}'
   location: location
   properties: {
     hardwareProfile: {
@@ -303,7 +291,7 @@ runcmd:
 // WebBastion VM Resources
 // ----------------------
 resource nsgWebbastion 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
-  name: webbastionNSGName
+  name: 'nsg-${webbastionVmName}'
   location: location
   properties: {
     securityRules: [
@@ -325,7 +313,7 @@ resource nsgWebbastion 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
 }
 
 resource webbastionVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
-  name: webbastionVnetName
+  name: 'vnet-${webbastionVmName}'
   location: location
   properties: {
     addressSpace: {
@@ -333,7 +321,7 @@ resource webbastionVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
     }
     subnets: [
       {
-        name: webbastionSubnetName
+        name: 'subnet-${webbastionVmName}'
         properties: {
           addressPrefix: webbastionSubnetPrefix
           networkSecurityGroup: {
@@ -346,7 +334,7 @@ resource webbastionVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
 }
 
 resource webbastionPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
-  name: webbastionPubIPName
+  name: 'pubip-${webbastionVmName}'
   location: location
   sku: {
     name: 'Standard'
@@ -357,7 +345,7 @@ resource webbastionPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
 }
 
 resource webbastionNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
-  name: '${webbastionVmName}-nic'
+  name: 'nic-${webbastionVmName}'
   location: location
   properties: {
     ipConfigurations: [
@@ -378,7 +366,7 @@ resource webbastionNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
 }
 
 resource webbastionVm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
-  name: webbastionVmName
+  name: 'vm-${webbastionVmName}'
   location: location
   properties: {
     hardwareProfile: {
