@@ -7,20 +7,99 @@ param adminUsername string = 'azureuser'
 // Kali VM
 param kaliVmName string = 'kali'
 param kaliVmSize string = 'Standard_B2ts_v2'
+
+
+//Networking
 param kaliVnetPrefix string = '192.168.0.0/16'
 param kaliSubnetPrefix string = '192.168.10.0/24'
+param serversVnetPrefix string = '10.1.0.0/16'
+param serversSubnetPrefix string = '10.1.10.0/24'
+param serversNetworkName string = 'servers'
+param serversSubnetName string ='servers'
 
-// WebSSH VM
-param websshVmName string = 'webssh'
-param websshVmSize string = 'Standard_B2ts_v2'
-param websshVnetPrefix string = '10.2.0.0/16'
-param websshSubnetPrefix string = '10.2.1.0/24'
+// linux VM
+param linuxVmName string = 'linux'
+param linuxVmSize string = 'Standard_B2ts_v2'
 
-// WebBastion VM
-param webbastionVmName string = 'webbast'
-param webbastionVmSize string = 'Standard_B2ts_v2'
-param webbastionVnetPrefix string = '10.3.0.0/16'
-param webbastionSubnetPrefix string = '10.3.1.0/24'
+
+// win VM
+param winVmName string = 'win'
+param winVmSize string = 'Standard_B2ls_v2'
+
+
+// ----------------------
+// Network Resources
+// ----------------------
+
+
+resource serversVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
+  name: 'vnet-${serversNetworkName}'
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [serversVnetPrefix]
+    }
+    subnets: [
+      {
+        name: 'subnet-${serversSubnetName}'
+        properties: {
+          addressPrefix: serversSubnetPrefix
+          networkSecurityGroup: {
+            id: nsgServers.id
+          }
+        }
+      }
+    ]
+  }
+}
+
+resource nsgServers 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
+  name: 'nsg-${serversNetworkName}'
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowSSH'
+        properties: {
+          priority: 1000
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourcePortRange: '*'
+          destinationPortRange: '22'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'AllowHTTP'
+        properties: {
+          priority: 1010
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourcePortRange: '*'
+          destinationPortRange: '80'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'AllowRDP'
+        properties: {
+          priority: 1020
+          protocol: 'Tcp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourcePortRange: '*'
+          destinationPortRange: '3389'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
+  }
+}
 
 // ----------------------
 // Kali VM Resources
@@ -42,7 +121,7 @@ resource nsgKali 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
           sourceAddressPrefix: '*'
           destinationAddressPrefix: '*'
         }
-      }
+      }      
     ]
   }
 }
@@ -56,7 +135,7 @@ resource kaliVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
     }
     subnets: [
       {
-        name: 'nsg-${kaliVmName}'
+        name: 'subnet-${kaliVmName}'
         properties: {
           addressPrefix: kaliSubnetPrefix
           networkSecurityGroup: {
@@ -148,66 +227,11 @@ packages:
 }
 
 // ----------------------
-// WebSSH VM Resources
+// linux VM Resources
 // ----------------------
-resource nsgWebssh 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
-  name: 'nsg-${websshVmName}'
-  location: location
-  properties: {
-    securityRules: [
-      {
-        name: 'AllowSSH'
-        properties: {
-          priority: 1000
-          protocol: 'Tcp'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourcePortRange: '*'
-          destinationPortRange: '22'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-        }
-      }
-      {
-        name: 'AllowHTTP'
-        properties: {
-          priority: 1010
-          protocol: 'Tcp'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourcePortRange: '*'
-          destinationPortRange: '80'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-        }
-      }
-    ]
-  }
-}
 
-resource websshVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
-  name: 'vnet-${websshVmName}'
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [websshVnetPrefix]
-    }
-    subnets: [
-      {
-        name: 'subnet-${websshVmName}'
-        properties: {
-          addressPrefix: websshSubnetPrefix
-          networkSecurityGroup: {
-            id: nsgWebssh.id
-          }
-        }
-      }
-    ]
-  }
-}
-
-resource websshPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
-  name: 'pubip-${websshVmName}'
+resource linuxPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
+  name: 'pubip-${linuxVmName}'
   location: location
   sku: {
     name: 'Standard'
@@ -217,8 +241,8 @@ resource websshPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
   }
 }
 
-resource websshNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
-  name: 'nic-${websshVmName}'
+resource linuxNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
+  name: 'nic-${linuxVmName}'
   location: location
   properties: {
     ipConfigurations: [
@@ -226,11 +250,11 @@ resource websshNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: websshVnet.properties.subnets[0].id
+            id: serversVnet.properties.subnets[0].id
           }
           privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
-            id: websshPubIP.id
+            id: linuxPubIP.id
           }
         }
       }
@@ -238,12 +262,12 @@ resource websshNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
   }
 }
 
-resource websshVm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
-  name: 'vm-${websshVmName}'
+resource linuxVm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
+  name: 'vm-${linuxVmName}'
   location: location
   properties: {
     hardwareProfile: {
-      vmSize: websshVmSize
+      vmSize: linuxVmSize
     }
     storageProfile: {
       osDisk: {
@@ -260,7 +284,7 @@ resource websshVm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
       }
     }
     osProfile: {
-      computerName: websshVmName
+      computerName: linuxVmName
       adminUsername: adminUsername
       adminPassword: adminPassword
       customData: base64('''
@@ -279,7 +303,7 @@ runcmd:
     networkProfile: {
       networkInterfaces: [
         {
-          id: websshNic.id
+          id: linuxNic.id
         }
       ]
     }
@@ -288,53 +312,10 @@ runcmd:
 
 
 // ----------------------
-// WebBastion VM Resources
+// win VM Resources
 // ----------------------
-resource nsgWebbastion 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
-  name: 'nsg-${webbastionVmName}'
-  location: location
-  properties: {
-    securityRules: [
-      {
-        name: 'AllowHTTP'
-        properties: {
-          priority: 1000
-          protocol: 'Tcp'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourcePortRange: '*'
-          destinationPortRange: '80'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-        }
-      }
-    ]
-  }
-}
-
-resource webbastionVnet 'Microsoft.Network/virtualNetworks@2025-05-01' = {
-  name: 'vnet-${webbastionVmName}'
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [webbastionVnetPrefix]
-    }
-    subnets: [
-      {
-        name: 'subnet-${webbastionVmName}'
-        properties: {
-          addressPrefix: webbastionSubnetPrefix
-          networkSecurityGroup: {
-            id: nsgWebbastion.id
-          }
-        }
-      }
-    ]
-  }
-}
-
-resource webbastionPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
-  name: 'pubip-${webbastionVmName}'
+resource winPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
+  name: 'pubip-${winVmName}'
   location: location
   sku: {
     name: 'Standard'
@@ -344,8 +325,8 @@ resource webbastionPubIP 'Microsoft.Network/publicIPAddresses@2025-05-01' = {
   }
 }
 
-resource webbastionNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
-  name: 'nic-${webbastionVmName}'
+resource winNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
+  name: 'nic-${winVmName}'
   location: location
   properties: {
     ipConfigurations: [
@@ -353,11 +334,11 @@ resource webbastionNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: webbastionVnet.properties.subnets[0].id
+            id: serversVnet.properties.subnets[0].id
           }
           privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
-            id: webbastionPubIP.id
+            id: winPubIP.id
           }
         }
       }
@@ -365,12 +346,12 @@ resource webbastionNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
   }
 }
 
-resource webbastionVm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
-  name: 'vm-${webbastionVmName}'
+resource winVm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
+  name: 'vm-${winVmName}'
   location: location
   properties: {
     hardwareProfile: {
-      vmSize: webbastionVmSize
+      vmSize: winVmSize
     }
     storageProfile: {
       osDisk: {
@@ -380,33 +361,21 @@ resource webbastionVm 'Microsoft.Compute/virtualMachines@2023-03-01' = {
         }
       }
       imageReference: {
-        publisher: 'Canonical'
-        offer: 'ubuntu-24_04-lts'
-        sku: 'server'
+        publisher: 'MicrosoftWindowsServer'
+        offer: 'WindowsServer'
+        sku: '2025-datacenter-smalldisk-g2'
         version: 'latest'
       }
     }
     osProfile: {
-      computerName: webbastionVmName
+      computerName: winVmName
       adminUsername: adminUsername
       adminPassword: adminPassword
-      customData: base64('''
-#cloud-config
-package_upgrade: true
- 
-packages:
-  - docker.io
- 
-runcmd:
-  - systemctl start docker
-  - systemctl enable docker
-  - docker run -d --restart unless-stopped -p 80:80 klaaspxl/ca-staticweb:vm
-''')
     }
     networkProfile: {
       networkInterfaces: [
         {
-          id: webbastionNic.id
+          id: winNic.id
         }
       ]
     }
