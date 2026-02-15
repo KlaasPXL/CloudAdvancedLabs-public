@@ -23,7 +23,7 @@ param linuxVmSize string = 'Standard_B2ts_v2'
 
 
 // win VM
-param winVmName string = 'win'
+param winVmName string = 'winserv'
 param winVmSize string = 'Standard_B2ls_v2'
 
 
@@ -58,6 +58,8 @@ resource nsgServers 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
   location: location
   properties: {
     securityRules: [
+
+      // Allow SSH for Linux + Windows
       {
         name: 'AllowSSH'
         properties: {
@@ -68,9 +70,18 @@ resource nsgServers 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
           sourcePortRange: '*'
           destinationPortRange: '22'
           sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
+          destinationApplicationSecurityGroups: [
+            {
+              id: asgServersLinux.id
+            }
+            {
+              id: asgServersWindows.id
+            }
+          ]
         }
       }
+
+      // Allow HTTP only for Linux
       {
         name: 'AllowHTTP'
         properties: {
@@ -81,9 +92,15 @@ resource nsgServers 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
           sourcePortRange: '*'
           destinationPortRange: '80'
           sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
+          destinationApplicationSecurityGroups: [
+            {
+              id: asgServersLinux.id
+            }
+          ]
         }
       }
+
+      // Allow RDP only for Windows
       {
         name: 'AllowRDP'
         properties: {
@@ -94,11 +111,26 @@ resource nsgServers 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
           sourcePortRange: '*'
           destinationPortRange: '3389'
           sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
+          destinationApplicationSecurityGroups: [
+            {
+              id: asgServersWindows.id
+            }
+          ]
         }
       }
     ]
   }
+}
+
+
+resource asgServersLinux 'Microsoft.Network/applicationSecurityGroups@2025-05-01' = {
+  name: 'servers-linux'
+  location: resourceGroup().location
+}
+
+resource asgServersWindows 'Microsoft.Network/applicationSecurityGroups@2025-05-01' = {
+  name: 'servers-windows'
+  location: resourceGroup().location
 }
 
 // ----------------------
@@ -256,6 +288,11 @@ resource linuxNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
           publicIPAddress: {
             id: linuxPubIP.id
           }
+           applicationSecurityGroups: [
+            {
+              id: asgServersLinux.id
+            }
+          ]
         }
       }
     ]
@@ -340,6 +377,11 @@ resource winNic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
           publicIPAddress: {
             id: winPubIP.id
           }
+          applicationSecurityGroups: [
+            {
+              id: asgServersWindows.id
+            }
+          ]
         }
       }
     ]
