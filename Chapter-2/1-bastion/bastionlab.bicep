@@ -245,7 +245,7 @@ resource kaliVm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
       adminPassword: adminPassword
       customData: base64('''
 #cloud-config
-package_upgrade: true
+package_update: true
 packages:
   - nmap
 ''')
@@ -326,7 +326,7 @@ resource linuxVm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
       adminPassword: adminPassword
       customData: base64('''
 #cloud-config
-package_upgrade: true
+package_update: true
  
 packages:
   - docker.io
