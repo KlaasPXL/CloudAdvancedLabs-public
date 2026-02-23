@@ -5,11 +5,10 @@ param vmName string = 'vm-web'
 param nicName string = 'ipconfig'
 param nsgName string = 'nsgweb'
 param pipName string = 'pubipweb'
-param baseDNSlabel string = 'pubipdns'
 param adminUsername string = 'azureuser'
 var vnetAddressPrefix = '10.1.0.0/16'
 var subnetAddressPrefix = '10.1.10.0/24'
-var dnsLabelPrefix = uniqueString(resourceGroup().id, baseDNSlabel)
+
 
 @secure() 
 param adminPassword string
@@ -70,9 +69,6 @@ resource pip 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
     publicIPAllocationMethod: 'Static'
     publicIPAddressVersion: 'IPv4'
     idleTimeoutInMinutes: 4
-    dnsSettings: {
-      domainNameLabel: dnsLabelPrefix
-    }
   }
 }
 
