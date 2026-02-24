@@ -19,10 +19,10 @@ param privateSubnetPrefix string = '10.1.10.0/24'
 param publicSubnetName string = 'snet-public'
 param publicSubnetPrefix string = '10.1.20.0/24'
 param nsgName string = 'nsg-subnets'
-param nsgOtherName string ='nsg-OtherVnet'
-param otherVnetName string = 'vnet-othervnet'
+param nsgOtherName string ='nsg-othervnet'
+param otherVnetName string = 'vnet-other'
 param otherVnetAddressPrefix string = '10.2.0.0/16'
-param otherSubnetName string = 'snet-othersnet'
+param otherSubnetName string = 'snet-other'
 param otherSubnetPrefix string = '10.2.10.0/24'
 
 // ----------------------
